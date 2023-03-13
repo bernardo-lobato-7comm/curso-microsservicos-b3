@@ -15,3 +15,7 @@ Escolha a opção "iptables-legacy"
 ## Instalação do Docker
 Pode-se seguir o padrão de instalação de docker para a distro escolhida, no caso, Ubuntu.
 https://docs.docker.com/engine/install/ubuntu/
+
+
+## Guia completo de instalação
+https://educoutinho.com.br/windows/instalando-docker-no-wsl/#utilizar-iptables-legadas
