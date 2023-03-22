@@ -8,9 +8,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface OrderInbound {
-    UUID createOrder(List<Product> products);
+    UUID createOrder(UUID userId, List<Product> products);
     void addProduct(UUID id, Product product);
     void completeOrder(UUID id);
+
+    void bookProducts(UUID orderId);
     void deleteProduct(UUID id, UUID productId);
     Optional<Order> findById(UUID id);
 }

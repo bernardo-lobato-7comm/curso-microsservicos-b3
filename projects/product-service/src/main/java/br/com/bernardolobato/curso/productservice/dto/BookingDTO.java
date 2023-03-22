@@ -7,7 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class BookingDTO {
     String userId;
-    String transactionId;
     String productId;
     Integer quantity;
 }

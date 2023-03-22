@@ -35,11 +35,12 @@ public class ProductController {
 
     @PostMapping("/")
     public Product save(@RequestBody ProductDTO dto) {
-        Product p = Product.builder()
-                        .name(dto.getName())
-                        .brand(dto.getBrand())
-                        .description(dto.getDescription())
-                        .build();
+//        Product p = Product.builder()
+//                        .name(dto.getName())
+//                        .brand(dto.getBrand())
+//                        .description(dto.getDescription())
+//                        .build();
+        Product p = new Product();
         this.productRepository.save(p);
         return p;
     }
@@ -58,25 +59,11 @@ public class ProductController {
     }
 
     @PostMapping("/bookProduct")
-    public void book(@RequestBody BookingDTO dto) {
+    public String book(@RequestBody BookingDTO dto) {
 
-        this.bookingTransactionScript.execute(dto);
+        String transactionId = this.bookingTransactionScript.execute(dto);
 
-        Product p = this.productRepository.findById(UUID.fromString(dto.getProductId()))
-                .orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST, "Produto não encontrado"));
-
-        if (p.getQuantity() < dto.getQuantity()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade indisponível");
-        }
-
-        List<Booking> bookings = this.bookingRepository.findAllByProductId(dto.getProductId());
-        Integer total = bookings.stream().mapToInt((booking)->booking.getQuantity()).sum();
-
-        if (p.getQuantity() < total) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade indisponível");
-        }
-        Booking b = Booking.builder().product(p).transactionId(dto.getTransactionId()).quantity(dto.getQuantity()).build();
-        bookingRepository.save(b);
+       return transactionId;
     }
 
     @PostMapping("/retrieve")

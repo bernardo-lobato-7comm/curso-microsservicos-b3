@@ -1,11 +1,7 @@
 package br.com.bernardolobato.curso.orderservice.orderservice.application.domain;
 
-import br.com.bernardolobato.curso.orderservice.orderservice.application.events.DomainEvent;
-import br.com.bernardolobato.curso.orderservice.orderservice.application.events.OrderCompletedEvent;
-import br.com.bernardolobato.curso.orderservice.orderservice.application.events.OrderCreatedEvent;
+import br.com.bernardolobato.curso.orderservice.orderservice.application.events.*;
 import br.com.bernardolobato.curso.orderservice.orderservice.application.exceptions.DomainException;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -13,28 +9,31 @@ import java.util.stream.Collectors;
 
 public class Order {
     private UUID id;
+
+    private UUID userId;
     private OrderStatus status;
     private List<OrderItem> orderItems;
     private BigDecimal price;
     private List<DomainEvent> events = new ArrayList<>();;
 
-    public Order(final UUID id, final Product product) {
+    public Order(final UUID id, final UUID userId, final Product product) {
         this.id = id;
+        this.userId = userId;
 //        this.orderItems = Arrays.asList(new OrderItem(product));
         List<OrderItem> items = new ArrayList<>();
         items.add(new OrderItem(product));
         this.orderItems = items;
         this.status = OrderStatus.CREATED;
         this.price = product.getPrice();
-        this.events.add(new OrderCreatedEvent(this.id));
+        this.events.add(new OrderCreatedEvent(this.id, userId));
     }
 
-    public Order(final UUID id, final List<Product> products) {
+    public Order(final UUID id, final UUID userId, final List<Product> products) {
         this.id = id;
         this.orderItems = products.stream().map(OrderItem::new).collect(Collectors.toList());
         this.status = OrderStatus.CREATED;
         this.price = products.stream().map(Product::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
-        this.events.add(new OrderCreatedEvent(this.id));
+        this.events.add(new OrderCreatedEvent(this.id, userId));
     }
 
     public void complete() {
@@ -48,7 +47,7 @@ public class Order {
         validateProduct(product);
         orderItems.add(new OrderItem(product));
         price = price.add(product.getPrice());
-        this.events.add(new OrderCreatedEvent(this.id));
+        this.events.add(new OrderCreatedEvent(this.id, this.userId));
     }
 
     public void removeProduct(final UUID id) {
@@ -56,7 +55,7 @@ public class Order {
         final OrderItem orderItem = getOrderItem(id);
         orderItems.remove(orderItem);
         price = price.subtract(orderItem.getPrice());
-        this.events.add(new OrderCreatedEvent(this.id));
+        this.events.add(new ProductRemovedEvent(this.id, id));
     }
 
     private OrderItem getOrderItem(final UUID id) {
@@ -117,5 +116,18 @@ public class Order {
     }
     public void clearEvents() {
         this.events.clear();
+    }
+
+    public void setUserValidated() {
+        this.status = OrderStatus.USER_VALIDATED;
+        this.events.add(new OrderValidateUserEvent(this.id, this.userId, true));
+    }
+
+    public void lockProducts() {
+        this.status = OrderStatus.PRODUCTS_LOCKED;
+
+        this.getOrderItems().forEach((item)-> {
+            this.events.add(new LockProductEvent(this.id, this.userId, 1));
+        });
     }
 }

@@ -4,9 +4,9 @@ package com.br.userservice.application.events;
 import java.util.UUID;
 
 public class UserCreatedEvent extends DomainEvent {
-    private String userId;
+    private UUID userId;
 
-    public UserCreatedEvent(String userId) {
+    public UserCreatedEvent(UUID userId) {
         super();
         this.userId = userId;
     }

@@ -10,10 +10,7 @@ public abstract class DomainEvent {
 
     @Getter
     private String id;
-    private DateTime createdTime;
-
     public DomainEvent() {
         this.id = UUID.randomUUID().toString();
-        this.createdTime = new DateTime();
     }
 }

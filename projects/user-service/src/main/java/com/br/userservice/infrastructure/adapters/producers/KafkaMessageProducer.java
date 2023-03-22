@@ -2,6 +2,7 @@ package com.br.userservice.infrastructure.adapters.producers;
 
 import com.br.userservice.application.events.DomainEvent;
 import com.br.userservice.application.port.outbound.UserEventPublisher;
+import io.confluent.shaded.com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -22,8 +23,9 @@ public class KafkaMessageProducer implements UserEventPublisher {
     @Override
     public void publish(List<DomainEvent> events) {
         events.forEach((event) -> {
-            this.kafkaTemplate.send(event.getClass().getSimpleName(), event.getId(), event.toString());
-            log.info(String.format("Publishing ValidatedUserEvent -> %s", event));
+            String eventJson = new Gson().toJson(event);
+            this.kafkaTemplate.send(event.getClass().getSimpleName(), event.getId().toString(), eventJson);
+            log.info(String.format("Publishing ValidatedUserEvent -> %s", eventJson));
         });
     }
 }

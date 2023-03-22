@@ -21,8 +21,8 @@ public class OrderDomainService implements OrderInbound {
     }
 
     @Override
-    public UUID createOrder(final List<Product> products) {
-        final Order order = new Order(UUID.randomUUID(), products);
+    public UUID createOrder(UUID userId, final List<Product> products) {
+        final Order order = new Order(userId, UUID.randomUUID(), products);
         orderRepository.save(order);
         orderEventPublisher.publish(order.getEvents());
         order.clearEvents();
@@ -44,6 +44,15 @@ public class OrderDomainService implements OrderInbound {
         final Order order = findById(id).get();
         order.complete();
 
+        orderEventPublisher.publish(order.getEvents());
+        order.clearEvents();
+        orderRepository.save(order);
+    }
+
+    @Override
+    public void bookProducts(UUID orderId) {
+        final Order order = findById(orderId).get();
+        order.lockProducts();
         orderEventPublisher.publish(order.getEvents());
         order.clearEvents();
         orderRepository.save(order);

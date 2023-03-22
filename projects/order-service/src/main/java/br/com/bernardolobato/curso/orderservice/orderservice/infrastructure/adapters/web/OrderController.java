@@ -24,7 +24,7 @@ public class OrderController {
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     CreateOrderResponse createOrder(@RequestBody final CreateOrderRequest createOrderRequest) {
-        final UUID id = orderInbound.createOrder(createOrderRequest.getProducts());
+        final UUID id = orderInbound.createOrder(createOrderRequest.getUserId(), createOrderRequest.getProducts());
 
         return new CreateOrderResponse(id);
     }
@@ -32,7 +32,6 @@ public class OrderController {
     @GetMapping("/{id}")
     Order findById(@PathVariable final UUID id) {
         final Order o = orderInbound.findById(id).get();
-
         return o;
     }
 

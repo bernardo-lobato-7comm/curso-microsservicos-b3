@@ -41,6 +41,8 @@ workspace {
 
                 this -> productService "Insere em tópicos de produto" "kafka" mensageria
                 this -> userService "Insere em tópicos de usuário " "kafka" mensageria
+
+                # this -> emailSystem "Envia Emails sobre pedidos" "REST/JSON" sincrona
             }
             
             OrderDatabase = container "Orders Database" {
@@ -101,7 +103,8 @@ workspace {
         }
         
         emailSystem = element "Sistema de envio de e-mails" "Processa os emails da aplicação." {
-            escamboio -> this "Envia os e-mails através de uma fila"
+            escamboio -> this "Envia os e-mails através de uma fila via HTTP/REST"
+            orderService -> this "Envia os e-mails através de uma fila via HTTP/REST" "HTTP/JSON"
         }
         paymentExternal = element "Sistema de Pagamentos" "Processa os pagamentos da aplicação." {
             escamboio -> this "Envia os e-mails através de uma fila"
@@ -121,6 +124,28 @@ workspace {
             include *
             autolayout lr
             
+        }
+
+        dynamic escamboio newOrder "Fluxo da criação de um novo pedido" {
+
+            # autolayout
+
+            orderService -> userService "Envia evento OrderCreated" "kafka"
+            userService -> orderService "Retorna com UserValidated" "kafka"
+
+            orderService -> productService "Envia o Evento UserOrderValidated" "kafka"
+
+            productService -> orderService "Envia o Evento ProductLocked" "kafka"
+
+            orderService -> PaymentService "Envia o Evento OrderProductLocked" "kafka"
+            
+            paymentService -> orderService "Envia o Evento PaymentProcessed" "kafka"
+
+            orderService -> productService "Envia o Evento OrderPaymentProcessed" "kafka"
+            
+            orderService -> emailSystem "Envia E-mail de Pedido Aprovado" "HTTP/JSON"
+
+
         }
 
         theme default

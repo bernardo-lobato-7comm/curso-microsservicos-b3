@@ -2,7 +2,7 @@ package com.br.userservice.infrastructure.adapters.consumers;
 
 import com.br.userservice.application.port.inbound.UserInbound;
 import io.confluent.shaded.com.google.gson.Gson;
-import org.apache.avro.Schema;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Component
+@Slf4j
 public class OrderCreatedConsumer {
 
     class OrderCreatedEvent {
@@ -42,7 +43,7 @@ public class OrderCreatedConsumer {
     public void listen(String in) {
         System.out.println(in);
         OrderCreatedEvent e = new Gson().fromJson(in, OrderCreatedEvent.class);
-        this.userInbound.validateUser(e.userID);
-        //System.out.println(e.userID);
+        this.userInbound.validateUser(e.orderID, e.userID);
+        System.out.println(e.userID);
     }
 }

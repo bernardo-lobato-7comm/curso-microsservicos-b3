@@ -7,11 +7,13 @@ import br.com.bernardolobato.curso.productservice.repository.BookingRepository;
 import br.com.bernardolobato.curso.productservice.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
 
+@Service
 public class ProcessProductTransactionScript implements BookingTransactionScript, ConfirmProcessProductTransactionScript {
 
     @Autowired
@@ -20,7 +22,7 @@ public class ProcessProductTransactionScript implements BookingTransactionScript
     BookingRepository bookingRepository;
 
     @Override
-    public void execute(BookingDTO dto) {
+    public String execute(BookingDTO dto) {
         Product p = this.productRepository.findById(UUID.fromString(dto.getProductId()))
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST, "Produto não encontrado"));
 
@@ -34,8 +36,11 @@ public class ProcessProductTransactionScript implements BookingTransactionScript
         if (p.getQuantity() < total) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade indisponível");
         }
-        Booking b = Booking.builder().product(p).transactionId(dto.getTransactionId()).quantity(dto.getQuantity()).build();
-        bookingRepository.save(b);
+//        Booking b = Booking.builder().product(p).transactionId(dto.getTransactionId()).quantity(dto.getQuantity()).build();
+//        Booking r = bookingRepository.save(b);
+//        return r.getTransactionId();
+
+        return null;
     }
 
     @Override

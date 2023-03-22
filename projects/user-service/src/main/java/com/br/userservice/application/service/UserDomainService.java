@@ -25,11 +25,11 @@ public class UserDomainService implements UserInbound {
 
     @Override
     public String createUser(String email) {
-        User user = new User(UUID.randomUUID().toString(), email);
+        User user = new User(UUID.randomUUID(), email);
         userRepository.save(user);
         userEventPublisher.publish(user.getEvents());
         user.clearEvents();
-        return user.getId();
+        return user.getId().toString();
     }
 
     @Override
@@ -54,13 +54,13 @@ public class UserDomainService implements UserInbound {
 
 
     @Override
-    public void validateUser(UUID id) {
-        log.info("Validating user: {}", id);
+    public void validateUser(UUID orderID, UUID userId) {
+        log.info("Validating user: {}", userId);
         //Optional<User> obj = findById(id.toString());
         //User user = obj.orElseThrow(() -> new DomainException("Usuário não existe"));
-        User user = new User();
-        user.validateUser();
-        log.info("user {} validated", id);
+        User user = new User(userId);
+        user.validateUser(orderID);
+        log.info("user {} validated", userId);
         userEventPublisher.publish(user.getEvents());
         user.clearEvents();
 

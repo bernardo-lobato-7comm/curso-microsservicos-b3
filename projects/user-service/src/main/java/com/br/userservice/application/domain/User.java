@@ -18,15 +18,16 @@ import java.util.UUID;
 public class User implements Serializable {
 
 
-    private String id;
+    private UUID id;
     private String email;
     @JsonIgnore
     private List<DomainEvent> events = new ArrayList<>();
 
-    public User() {
+    public User(UUID userId) {
+        this.id = userId;
     }
 
-    public User(String userId, String email) {
+    public User(UUID userId, String email) {
         this.id = userId;
         this.email = email;
         this.events.add(new UserCreatedEvent(this.id));
@@ -36,8 +37,8 @@ public class User implements Serializable {
         this.events.clear();
     }
 
-    public Boolean validateUser() {
-        this.events.add(new UserValidatedEvent(this.id, true));
+    public Boolean validateUser(UUID orderId) {
+        this.events.add(new UserValidatedEvent(orderId, this.id, true));
         return true;
     }
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import java.util.UUID;
 
 @Entity
@@ -14,6 +15,7 @@ import java.util.UUID;
 public class Booking {
     @Id
     UUID id;
+    @ManyToOne
     Product product;
     String transactionId;
     Integer quantity;

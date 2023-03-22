@@ -8,6 +8,8 @@ import br.com.bernardolobato.curso.orderservice.orderservice.application.port.in
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @ComponentScan(basePackageClasses = OrderServiceApplication.class)
@@ -16,5 +18,15 @@ public class BeanConfiguration {
     @Bean
     OrderInbound orderService(final OrderRepository orderRepository, final OrderEventPublisher publisher) {
         return new OrderDomainService(orderRepository, publisher);
+    }
+
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/orders").allowedOrigins("*");
+            }
+        };
     }
 }
