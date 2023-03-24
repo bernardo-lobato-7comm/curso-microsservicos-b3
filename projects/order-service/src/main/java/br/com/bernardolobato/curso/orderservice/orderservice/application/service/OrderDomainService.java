@@ -22,7 +22,7 @@ public class OrderDomainService implements OrderInbound {
 
     @Override
     public UUID createOrder(UUID userId, final List<Product> products) {
-        final Order order = new Order(userId, UUID.randomUUID(), products);
+        final Order order = new Order(UUID.randomUUID(), userId, products);
         orderRepository.save(order);
         orderEventPublisher.publish(order.getEvents());
         order.clearEvents();

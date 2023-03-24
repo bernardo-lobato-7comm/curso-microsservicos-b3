@@ -1,8 +1,7 @@
 package br.com.bernardolobato.curso.productservice.entities;
 
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -10,13 +9,15 @@ import javax.persistence.ManyToOne;
 import java.util.UUID;
 
 @Entity
-@Getter
-@Builder
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Booking {
     @Id
     UUID id;
     @ManyToOne
     Product product;
-    String transactionId;
+    UUID orderId;
+
     Integer quantity;
 }

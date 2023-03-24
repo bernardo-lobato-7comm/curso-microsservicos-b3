@@ -11,11 +11,14 @@ public class Product {
     private final BigDecimal price;
     private final String name;
 
+    private final Integer quantity;
+
     @JsonCreator
-    public Product(@JsonProperty("id") final UUID id, @JsonProperty("price") final BigDecimal price, @JsonProperty("name") final String name) {
+    public Product(@JsonProperty("id") final UUID id, @JsonProperty("price") final BigDecimal price, @JsonProperty("name") final String name, @JsonProperty("quantity") final Integer quantity) {
         this.id = id;
         this.price = price;
         this.name = name;
+        this.quantity = quantity;
     }
 
     public BigDecimal getPrice() {
@@ -24,6 +27,10 @@ public class Product {
 
     public String getName() {
         return name;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
     }
 
     public UUID getId() {

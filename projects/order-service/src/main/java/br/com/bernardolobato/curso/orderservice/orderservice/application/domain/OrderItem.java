@@ -8,11 +8,13 @@ public class OrderItem {
     private String name;
     private UUID productId;
     private BigDecimal price;
+    private Integer quantity;
 
     public OrderItem(final Product product) {
         this.productId = product.getId();
         this.name = product.getName();
         this.price = product.getPrice();
+        this.quantity = product.getQuantity();
     }
 
     public UUID getProductId() {
@@ -25,6 +27,10 @@ public class OrderItem {
 
     public String getName() {
         return name;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
     }
 
     private OrderItem() {

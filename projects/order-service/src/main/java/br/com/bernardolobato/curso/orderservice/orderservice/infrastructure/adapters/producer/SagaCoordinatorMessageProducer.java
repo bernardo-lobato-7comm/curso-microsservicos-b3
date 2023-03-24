@@ -27,6 +27,7 @@ public class SagaCoordinatorMessageProducer implements OrderEventPublisher {
             String eventJson = new Gson().toJson(event);
             this.kafkaTemplate.send(event.getClass().getSimpleName(), event.getId().toString(), eventJson);
             log.info(String.format(event.getClass().getSimpleName(), eventJson));
+            System.out.println(eventJson);
         });
     }
 }

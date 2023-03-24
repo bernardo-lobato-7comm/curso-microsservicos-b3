@@ -7,8 +7,5 @@ import java.util.UUID;
 public abstract class DomainEvent {
 
     @Getter
-    private String id;
-    public DomainEvent() {
-        this.id = UUID.randomUUID().toString();
-    }
+    private String id =UUID.randomUUID().toString();
 }

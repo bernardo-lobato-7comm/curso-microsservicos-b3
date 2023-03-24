@@ -3,6 +3,9 @@ package br.com.bernardolobato.curso.productservice.transactionscript;
 import br.com.bernardolobato.curso.productservice.dto.BookingDTO;
 import br.com.bernardolobato.curso.productservice.entities.Booking;
 import br.com.bernardolobato.curso.productservice.entities.Product;
+import br.com.bernardolobato.curso.productservice.events.ProductsLockedErrorEvent;
+import br.com.bernardolobato.curso.productservice.events.ProductsLockedEvent;
+import br.com.bernardolobato.curso.productservice.producer.SagaMessageProducer;
 import br.com.bernardolobato.curso.productservice.repository.BookingRepository;
 import br.com.bernardolobato.curso.productservice.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,25 +24,48 @@ public class ProcessProductTransactionScript implements BookingTransactionScript
     @Autowired
     BookingRepository bookingRepository;
 
+    @Autowired
+    SagaMessageProducer producer;
+
     @Override
     public String execute(BookingDTO dto) {
-        Product p = this.productRepository.findById(UUID.fromString(dto.getProductId()))
-                .orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST, "Produto não encontrado"));
 
-        if (p.getQuantity() < dto.getQuantity()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade indisponível");
+        try {
+            Product p = this.productRepository.findById(dto.getProductId())
+                    .orElseThrow(()->new RuntimeException("Produto não encontrado"));
+
+            if (p.getQuantity() < dto.getQuantity()) {
+                throw new RuntimeException("Quantidade indisponível");
+            }
+
+            List<Booking> bookings = this.bookingRepository.findAllByProductId(dto.getProductId());
+            Integer total = bookings.stream().mapToInt((booking)->booking.getQuantity()).sum();
+
+            if (p.getQuantity() < total) {
+                throw new RuntimeException("Quantidade indisponível");
+            }
+
+            //TODO: save Booking
+            Product prod = this.productRepository.findById(dto.getProductId()).get();
+            this.bookingRepository.save(new Booking(UUID.randomUUID(), prod, dto.getOrderId(), dto.getQuantity()));
+
+            ProductsLockedEvent event = new ProductsLockedEvent();
+            event.setProductId(dto.getProductId());
+            event.setLocked(true);
+            event.setOrderID(dto.getOrderId());
+            event.setUserID(dto.getUserId());
+            event.setProductLockedQuantity(dto.getQuantity());
+
+            this.producer.publish(event);
+        } catch(RuntimeException ex) {
+            ProductsLockedErrorEvent event = new ProductsLockedErrorEvent();
+            event.setProductId(dto.getProductId());
+            event.setLocked(false);
+            event.setOrderID(dto.getOrderId());
+            event.setUserID(dto.getUserId());
+            event.setProductLockedQuantity(dto.getQuantity());
+            this.producer.publish(event);
         }
-
-        List<Booking> bookings = this.bookingRepository.findAllByProductId(dto.getProductId());
-        Integer total = bookings.stream().mapToInt((booking)->booking.getQuantity()).sum();
-
-        if (p.getQuantity() < total) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade indisponível");
-        }
-//        Booking b = Booking.builder().product(p).transactionId(dto.getTransactionId()).quantity(dto.getQuantity()).build();
-//        Booking r = bookingRepository.save(b);
-//        return r.getTransactionId();
-
         return null;
     }
 

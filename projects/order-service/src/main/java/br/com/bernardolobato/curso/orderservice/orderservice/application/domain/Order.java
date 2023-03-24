@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 public class Order {
     private UUID id;
-
     private UUID userId;
     private OrderStatus status;
     private List<OrderItem> orderItems;
@@ -25,7 +24,7 @@ public class Order {
         this.orderItems = items;
         this.status = OrderStatus.CREATED;
         this.price = product.getPrice();
-        this.events.add(new OrderCreatedEvent(this.id, userId));
+        this.events.add(new OrderCreatedEvent(this.id, this.userId, items));
     }
 
     public Order(final UUID id, final UUID userId, final List<Product> products) {
@@ -33,7 +32,7 @@ public class Order {
         this.orderItems = products.stream().map(OrderItem::new).collect(Collectors.toList());
         this.status = OrderStatus.CREATED;
         this.price = products.stream().map(Product::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
-        this.events.add(new OrderCreatedEvent(this.id, userId));
+        this.events.add(new OrderCreatedEvent(this.id, userId, orderItems));
     }
 
     public void complete() {
@@ -47,7 +46,7 @@ public class Order {
         validateProduct(product);
         orderItems.add(new OrderItem(product));
         price = price.add(product.getPrice());
-        this.events.add(new OrderCreatedEvent(this.id, this.userId));
+        this.events.add(new OrderCreatedEvent(this.id, this.userId, orderItems));
     }
 
     public void removeProduct(final UUID id) {

@@ -8,5 +8,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface BookingRepository  extends CrudRepository<Booking, UUID> {
-    List<Booking> findAllByProductId(String productID);
+    List<Booking> findAllByProductId(UUID productID);
 }

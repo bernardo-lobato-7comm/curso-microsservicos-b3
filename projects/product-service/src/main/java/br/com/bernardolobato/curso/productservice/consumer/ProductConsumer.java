@@ -1,7 +1,8 @@
 package br.com.bernardolobato.curso.productservice.consumer;
 
 import br.com.bernardolobato.curso.productservice.dto.BookingDTO;
-import br.com.bernardolobato.curso.productservice.events.LockProductEvent;
+import br.com.bernardolobato.curso.productservice.events.OrderCreatedEvent;
+import br.com.bernardolobato.curso.productservice.events.ProductsLockedEvent;
 import br.com.bernardolobato.curso.productservice.transactionscript.BookingTransactionScript;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -15,13 +16,14 @@ public class ProductConsumer {
     @Autowired
     BookingTransactionScript bookingTransactionScript;
 
-    @KafkaListener(topics = "LockProductEvent", groupId = "ProductService")
+    @KafkaListener(topics = "OrderCreatedEvent", groupId = "ProductService")
     public void listen(String in) {
         System.out.println(in);
-        LockProductEvent e = new Gson().fromJson(in, LockProductEvent.class);
+        OrderCreatedEvent e = new Gson().fromJson(in, OrderCreatedEvent.class);
 
-        BookingDTO dto = new BookingDTO(e.getProductId(), e.getUserId(), e.getQuantity());
-        this.bookingTransactionScript.execute(dto);
-        System.out.println(e);
+        e.getItems().forEach((el)-> {
+                BookingDTO dto = new BookingDTO(e.getOrderID(), e.getUserID(),  el.getProductId(), el.getQuantity());
+                this.bookingTransactionScript.execute(dto);
+        });
     }
 }
